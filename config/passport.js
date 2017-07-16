@@ -12,6 +12,7 @@ passport.deserializeUser(function(id, done) {
     });
 });
 
+//signup strategy - means validate data and create new user
 passport.use('local.signup', new LocalStrategy({
     usernameField: 'email',
     passportField: 'password',
@@ -44,4 +45,38 @@ passport.use('local.signup', new LocalStrategy({
             return done(null, newUser);
         });
     });
+}));
+
+//signin strategy - means validate data and signin user
+
+passport.use('local.signin', new LocalStrategy({
+    usernameField: 'email',
+    passportField: 'password',
+    passReqToCallback: true
+}, function(req, email, password, done) {
+    //validation
+    req.checkBody('email', 'Invalid email').notEmpty().isEmail();
+    req.checkBody('password', 'Invalid password').notEmpty();
+    var errors = req.validationErrors();
+    if (errors) {
+        var messages = [];
+        errors.forEach(function(error) {
+            messages.push(error.msg);
+        });
+        return done(null, false, req.flash('error', messages));
+    }
+    //find the user
+    User.findOne({'email': email}, function(err, user) {
+        if (err) {
+            return done(err);
+        }
+        if (!user) {
+            return done(null, false, {message: 'This user does not exist.'});
+        }
+        if (!user.validPassword(password)) {
+            return done(null, false, {message: 'Invalid password.'});
+        }
+        return done(null, user);
+    });
+
 }));
