@@ -1,5 +1,5 @@
 module.exports = function Cart(oldCart) {
-    this.items = oldCart || {};
+    this.items = oldCart.items || {};
     this.totalQty = oldCart.totalQty || 0;
     this.totalPrice = oldCart.totalPrice || 0;
 
@@ -17,7 +17,7 @@ module.exports = function Cart(oldCart) {
     this.generateArray = function() {
         var arr = [];
         for (var id in this.items) {
-            arr.push(this.item[id]);
+            arr.push(this.items[id]);
         }
         return arr;
     };
