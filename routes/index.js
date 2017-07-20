@@ -3,6 +3,7 @@ var router = express.Router();
 var Cart = require('../models/cart');
 
 var Product = require('../models/product');
+var Order = require('../models/order');
 
 
 
@@ -74,10 +75,19 @@ router.post('/checkout', function(req, res, next) {
             return res.redirect('/checkout');
         }
         // if everything is ok
-        req.flash('success', 'Well done! Payment Accepted.');
-        // clear up the shopping cart
-        req.session.cart = null;
-        res.redirect('/');
+        var order = new Order({
+            user: req.user,
+            cart: cart,
+            adress: req.body.adress,
+            name: req.body.name,
+            paymentId: charge.id
+        });
+        order.save(function(err, result) {
+            req.flash('success', 'Well done! Payment Accepted.');
+            // clear up the shopping cart
+            req.session.cart = null;
+            res.redirect('/');
+        });
 
 
     });
